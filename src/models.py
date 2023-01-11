@@ -8,10 +8,13 @@ from eralchemy2 import render_er
 
 Base = declarative_base()
 
-##class: Here we define columns for each table. Notice that each column is also a normal Python instance attribute
+##class: Here we define columns for each table. Notice that each column is also a normal Python instance attribute.
+## nullable = False significa que es campo obligatorio.
 
 
-##tablas predeterminadas -> boilerplate:
+
+##TABLAS PREDETERMINADAS -> BOILERPLATE:
+
 
 class Person(Base):
     __tablename__ = 'person'
@@ -25,61 +28,83 @@ class Address(Base):
     street_name = Column(String(250))
     street_number = Column(String(250))
     post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+    person_id = Column(Integer, ForeignKey('person.id')) 
+    person = relationship(Person) 
 
 
-##tablas adicionales:
 
+##TABLAS ADICIONALES:
+
+
+##Personas que usan la App.
 class User(Base):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
+    first_name = Column(String(150), nullable=False) 
+    second_name = Column(String(150), nullable=True)
+    last_name = Column(String(150), nullable=False)
+    profile_name = Column(String(150), nullable=False)
+    email = Column(String(150), nullable=False)
+    signup_date = Column(String(150), nullable=False)
 
 
-class Follow(Base):
-    __tablename__ = 'follow'
-    id = Column(Integer, primary_key=True)
-
-
-class Follower(User):
-    __tablename__ = 'follower'
-    id = Column(Integer, primary_key=True)
-
-
+##Donde personas agregan fotos/videos a la App.
 class Post(Base):
     __tablename__ = 'post'
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    date_time = Column(String(150), nullable=False)
 
 
-class Comment(Base):
-    __tablename__ = 'comment'
-    id = Column(Integer, primary_key=True)
-
-
+##Tabla separada donde se guardan las fotos/videos en un post.
 class Media(Base):
     __tablename__ = 'media'
     id = Column(Integer, primary_key=True)
+    post_id = Column (Integer, ForeignKey('post.id'))
+    media_file = Column (String(200), nullable=False)
+    position_file = Column (Integer, nullable=False)
+    relation_post = relationship(Post)
 
 
-class History(Base):
-    __tablename__ = 'history'
+##Tabla para capturar los "seguidos" de un usuario.
+class Follower(Base):
+    __tablename__ = 'follower'
     id = Column(Integer, primary_key=True)
+    following_user_id = Column(Integer, ForeignKey('user.id'))
+    followed_user_id = Column(Integer, ForeignKey('user.id'))
+    relation_user = relationship(User)
 
 
-class Publicity(Base):
-    __tablename__ = 'publicity'
+##Tabla de notificación -> etiquetar usuario/s en post de foto
+class Tag(Base):
+    __tablename__ = 'tag'
     id = Column(Integer, primary_key=True)
+    media_id = Column(Integer, ForeignKey('media.id'))
+    user_id = Column (Integer, ForeignKey('user.id'))
+    relation_media = relationship(Media)
+    relation_user = relationship(User)
 
 
-class Shop(Base):
-    __tablename__ = 'shop'
+##Tabla de comentarios -> opción de que otros users comenten post.
+class Comment(Base):
+    __tablename__ = 'comment'
     id = Column(Integer, primary_key=True)
+    user_id = Column (Integer, ForeignKey('user.id'))
+    post_id = Column(Integer, ForeignKey('post.id'))
+    date_time = Column(String(150), nullable=False)
+    comment_text = Column(String(300), nullable=True)
+    relation_user = relationship(User)
+    relation_post = relationship(Post)
+    
 
-
-
-
-
-
+##Tabla de likes -> booleano.
+class Like(Base):
+    __tablename__ = 'like'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    post_id = Column(Integer, ForeignKey('post.id'))
+    relation_user = relationship(User)
+    relation_post = relationship(Post)
 
 
 
