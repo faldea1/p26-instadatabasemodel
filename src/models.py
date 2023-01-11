@@ -21,6 +21,8 @@ class Person(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
 
+    children10 = relationship('Address', back_populates='address_relation_person')
+
 
 class Address(Base):
     __tablename__ = 'address'
@@ -28,8 +30,9 @@ class Address(Base):
     street_name = Column(String(250))
     street_number = Column(String(250))
     post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id')) 
-    person = relationship(Person) 
+    person_id = Column(Integer, ForeignKey('person.id'))
+
+    address_relation_person = relationship('Person', back_populates='children10') 
 
 
 
@@ -47,6 +50,11 @@ class User(Base):
     email = Column(String(150), nullable=False)
     signup_date = Column(String(150), nullable=False)
 
+    children1 = relationship('Like', back_populates='like_relation_user')
+    children3 = relationship('Comment', back_populates='comment_relation_user')
+    children6 = relationship('Tag', back_populates='tag_relation_user')
+    children7 = relationship('Follower', back_populates='follower_relation_user')
+    children9 = relationship('Post', back_populates='post_relation_user')
 
 ##Donde personas agregan fotos/videos a la App.
 class Post(Base):
@@ -54,6 +62,12 @@ class Post(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'))
     date_time = Column(String(150), nullable=False)
+
+    children2 = relationship('Like', back_populates='like_relation_post')
+    children4 = relationship('Comment', back_populates='comment_relation_post')
+    children8 = relationship('Media', back_populates='media_relation_post')
+
+    post_relation_user = relationship('User', back_populates='children9')
 
 
 ##Tabla separada donde se guardan las fotos/videos en un post.
@@ -63,26 +77,29 @@ class Media(Base):
     post_id = Column (Integer, ForeignKey('post.id'))
     media_file = Column (String(200), nullable=False)
     position_file = Column (Integer, nullable=False)
-    relation_post = relationship(Post)
+
+    children5 = relationship('Tag', back_populates='tag_relation_media')
+
+    media_relation_post = relationship('Post', back_populates='children8')
 
 
 ##Tabla para capturar los "seguidos" de un usuario.
 class Follower(Base):
     __tablename__ = 'follower'
-    id = Column(Integer, primary_key=True)
-    following_user_id = Column(Integer, ForeignKey('user.id'))
-    followed_user_id = Column(Integer, ForeignKey('user.id'))
-    relation_user = relationship(User)
+    following_user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+    followed_user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+
+    follower_relation_user = relationship('User', back_populates='children7')
 
 
 ##Tabla de notificación -> etiquetar usuario/s en post de foto
 class Tag(Base):
     __tablename__ = 'tag'
-    id = Column(Integer, primary_key=True)
-    media_id = Column(Integer, ForeignKey('media.id'))
-    user_id = Column (Integer, ForeignKey('user.id'))
-    relation_media = relationship(Media)
-    relation_user = relationship(User)
+    media_id = Column(Integer, ForeignKey('media.id'), primary_key=True)
+    user_id = Column (Integer, ForeignKey('user.id'), primary_key=True)
+
+    tag_relation_media = relationship('Media', back_populates='children5')
+    tag_relation_user = relationship('User', back_populates='children6')
 
 
 ##Tabla de comentarios -> opción de que otros users comenten post.
@@ -93,18 +110,19 @@ class Comment(Base):
     post_id = Column(Integer, ForeignKey('post.id'))
     date_time = Column(String(150), nullable=False)
     comment_text = Column(String(300), nullable=True)
-    relation_user = relationship(User)
-    relation_post = relationship(Post)
-    
 
+    comment_relation_user = relationship('User', back_populates='children3')
+    comment_relation_post = relationship('Post', back_populates='children4')
+
+    
 ##Tabla de likes -> booleano.
 class Like(Base):
     __tablename__ = 'like'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
-    post_id = Column(Integer, ForeignKey('post.id'))
-    relation_user = relationship(User)
-    relation_post = relationship(Post)
+    user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+    post_id = Column(Integer, ForeignKey('post.id'), primary_key=True)
+
+    like_relation_user = relationship('User', back_populates='children1')
+    like_relation_post = relationship('Post', back_populates='children2')
 
 
 
